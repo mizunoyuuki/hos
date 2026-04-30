@@ -1,0 +1,10 @@
+nasmのアセンブリで
+フロッピーディスクのデータを再現している。
+
+それをnasmでアセンブルし、qemuで起動する。
+
+qemu-system-i386
+-m 32        : このVMは32MBのメモリを詰む
+-rtc         : base=localtime
+-vga std     : グラフィックボードの指定 
+-fda fdimage : フロッピードライブA fda にidimageというファイルを差し込んでから電源を入れろ。という指定
