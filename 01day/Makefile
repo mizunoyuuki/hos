@@ -4,11 +4,19 @@ IMAGE = fdimage
 
 all: $(IMAGE)
 
-qemu: $(IMAGE)
+nbuild: $(IMAGE)
 	$(QEMU) $(QEMU_ARGS)
 
-$(IMAGE): fdimage.nas
+nasm: fdimage.nas
 	nasm fdimage.nas -o $(IMAGE)
+
+gas: helloos2.s
+	as helloos2.s -o helloos2.o
+	$(eval ELFHEAD_SIZE := $(shell readelf -h helloos2.o | grep "Size of this" | grep -o -E "[0-9]+"))
+	dd if=helloos2.o of=helloos.img skip=$(ELFHEAD_SIZE) bs=1 count=512
+
+gbuild:
+	$(QEMU) -fda helloos.img
 
 clean:
 	rm -rf fdimage
