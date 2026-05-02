@@ -8,3 +8,8 @@ qemu-system-i386
 -rtc         : base=localtime
 -vga std     : グラフィックボードの指定 
 -fda fdimage : フロッピードライブA fda にidimageというファイルを差し込んでから電源を入れろ。という指定
+
+
+フロッピーディスクは1.44MBのデータ
+
+昔のBIOSは、FAT16フォーマットのデータで最初の512バイトを読み込んで実行する。
