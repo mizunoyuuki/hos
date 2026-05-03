@@ -1,0 +1,72 @@
+以下は全て16bitレジスタ
+
+AX: アキュムレータ
+CX: カウンタ
+DX: データ
+BX: ベース
+SP: スタックポインタ
+BP: ベースポインタ
+SI: ソースインデックス
+DI: デスティネーションインデックス
+
+ixはextended
+
+元々は8bitレジスタもある
+
+AL: アキュムレータロウ(low)
+CL: カウンタロウ
+DL: データロウ
+BL: ベースロウ
+AH: アキュムレータハイ
+CH: カウンタハイ
+DH: データハイ
+BH: ベースハイ
+
+AXレジスタの16bitのうち、下位8bit, 上位8bitで分けて、alとahがある。low, high
+
+32bitレジスタは、
+
+EAX: extended axレジスタ(アキュムレータ)
+ECX: extended cxレジスタ(カウンタ)
+EDX: extended dx
+EBX: extended bx
+ESP: extended sp
+ESI: extended si
+EDI: extended di
+
+これ以外に
+汎用レジスタ以外に、セグメントレジスタがある。
+
+ES: エクストラセグメント
+CS: コードセグメント
+SS: スタックセグメント
+DS: データセグメント
+FS: おまけ => 64bit PCではスレッド管理に使ってるTLS(thread local struct)
+GS: おまけ
+
+**************************************************************************************
+int 命令:
+
+BIOSで,
+
+int 0x10(ビデオ),
+int 0x13(ディスク読み書き), 
+int 0x16(キーボード入力)
+
+Linuxカーネル
+int 0x80
+システムコールの役割
+
+
+64bit
+
+syscall命令
+システムコール専用の、権限チェックとかすっ飛ばせる早い命令が出てきた。
+
+例えば、linuxでシステムコールを実行する場合、
+mov $1, %rax
+mov $1, %rdi
+mov $message, %rsi
+mov $13, %rdx
+syscall
+
