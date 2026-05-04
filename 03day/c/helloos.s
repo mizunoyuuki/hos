@@ -50,7 +50,7 @@ retry:
 
     addw $1, %si #count up
     cmp $5, %si
-    jae error
+    jbe error
 
     #reset drive(drive A)
     movb $0x00, %ah
