@@ -30,66 +30,63 @@ entry:
 
 	# load disk
 	movw $0x0820, %ax
-	movw %ax, %es
-	movb $0, %ch
-	movb $0, %dh
-	movb $2, %cl
-
+	movw %ax, %es  # buffer address(ES:BX)
+	movb $0, %ch   # Cylinder 0
+	movb $0, %dh   # head 0
+	movb $2, %cl   # sector 2
 
 readloop:
-	movw $0, %si
-
+	movw $0, %si  #retry counter
 
 retry:
-    movb $0x02, %ah # ah=0x02 read
-    movb $1, %al #  1 sector
-    movw $0, %bx #buffer address(ES:BX)
-    movb $0x00, %dl # drive A:
-    int $0x13 #intrupt bios
-    jnc next # jump if not error
+	movb $0x02, %ah # ah=0x02 read
+	movb $1, %al    # 1 sector
+	movw $0, %bx
+	movb $0x00, %dl
+	int $0x13
+	jnc next    # jump if not error
 
-    addw $1, %si #count up
-    cmp $5, %si
-    jbe error
+	addw $1, %si  # count up
+	cmp $5, %si
+	jae error
 
-    #reset drive(drive A)
-    movb $0x00, %ah
-    movb $0x00, %dl # drive A:
-    int $0x13
+	# reset drive(drive A)
+	movb $0x00, %ah
+	movb $0x00, %dl
+	int $0x13
 
-    jmp retry
+	jmp entry
 
 
 next:
-    movw %es, %ax
-    add $0x20, %ax  #512 / 16 = 0x20
-                    #対象のアドレスは(ES x 16 + BX)でキマるので、ESを0x20ずらすと、512byte分(1セクタ)ずらしたのとおなじになる
-    movw %ax, %es #because instruction is not exist for add immidiate to es
-    add $1, %cl
-    cmp $18, %cl #read to sector 18
-    jae readloop
+	movw %es, %ax
+	add $0x20, %ax  # 512 / 16 = 0x20
+
+	movw %ax, %es
+	add $1, %cl
+	cmp $18, %cl
+
+	jae readloop
 
 fin:
-    hlt
-    jmp fin
+	hlt
+	jmp fin
 
 error:
-    movw $msg, %si
+	movw $msg, %si
 
 putloop:
-    movb (%si), %al
-    addw $1, %si
-    cmpb $0, %al
-    je fin
-    movb $0x0e, %ah
-    movw $15, %bx
-    int $0x10
-    jmp putloop
+	movb (%si), %dl
+	addw $1, %si
+	cmpb $0, %al
+	je fin
+	movb $0x0e, %dh
+	movw $15, %bx
+	int $0x10
+	jmp putloop
 
 msg:
-    .string "\nload error\n\n"
+	.string "\nload error\n\n"
 
-
-//end of boot sector(must be 0x55, 0xaa)
-.org 0x01fe
+.org 0x1fe
 .byte 0x55, 0xaa
