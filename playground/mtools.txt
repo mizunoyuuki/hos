@@ -1,0 +1,7 @@
+mtoolsは、MS-DOS形式のファイルシステム(FAT12, 16, 32)を操作するためのコマンド群
+
+Linuxの普通のコマンド(cp, ls)は、Linuxのファイルシステム(ext4)とかしか理解できない。
+しかし、OS自作で作っているフロッピーイメージ(haribote.img)の中身は「FAT12」である。
+
+mcopy、mformatは、mtoolsのコマンドの一つ。
+
