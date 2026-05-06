@@ -78,7 +78,7 @@ next:
 	cmp $CYLS, %ch
 	jb readloop
 
-	jmp 0xc200 	# jmp to os program
+	jmp 0x8c00 	# jmp to os program
 			# 0x0800(buffer address) + 0x4200 (first file place of FAT12)
 			# セクタ2から先をメモリアドレス0x0820を先頭としてロード
 
