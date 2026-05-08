@@ -8,14 +8,14 @@
 .set SCRNY, 0x0ff6
 .set VRAM, 0x0ff8
 
-movb $0x13, %al
-movb $0x00, %ah
-int $0x10
+# movb $0x13, %al
+# movb $0x00, %ah
+# int $0x10
 
 # save screen information
-movb $8, (VMODE)
-int $0x16
-mov %al, (LEDS)
+# movb $8, (VMODE)
+# int $0x16
+# mov %al, (LEDS)
 
 movw $booted, %si
 
