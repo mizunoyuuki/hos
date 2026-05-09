@@ -1,0 +1,105 @@
+.text
+.code16
+
+jmp entry
+.byte 0x90
+.ascii "HELLOIPL"
+.word 512
+.byte 1
+.word 1
+.byte 2
+.word 224
+.word 2880
+.byte 0xf0
+.word 9
+.word 18
+.word 2
+.int 0
+.int 2880
+.byte 0,0,0x29
+.int 0xffffffff
+.ascii "HELLO-OS"
+.ascii "FAT12"
+.skip 18,0
+
+.set CYLS, 10
+.set _CYLS, 0xff0
+
+entry:
+	# initialize registers
+	movw $0, %ax
+	movw %ax, %ss
+	movw $0x7c00, %sp
+	movw %ax, %ds
+
+	# load disk
+	movw $0x0820, %ax
+	movw %ax, %es # buffer address (ES:BX)
+	movb $0, %ch  # Cylinder 0
+	movb $0, %dh  # head 0
+	movb $2, %cl  # sector 2
+
+readloop:
+	movw $0, %si # retry counter
+
+retry:
+	movb $0x02, %ah
+	movb $1, %al
+	movw $0, %bx
+	movb $0x00, %dl
+	int $0x13
+	jnc next
+
+	add $1, %si
+	cmp $5, %si
+	jae error
+
+	# reset drive
+	movb $0x00, %dh
+	movb $0x00, %dl
+	int $0x13
+
+	jmp retry
+next:
+	movw %es, %ax
+	add $0x20, %ax
+	movw %ax, %es
+	add $1, %cl
+	cmp $18, %cl
+	jbe readloop
+
+	movb $1, %cl
+	add $1, %dh
+	cmp $2, %dh
+	jb readloop
+
+	movb $0, %dh
+	add $1, %ch
+	cmp $CYLS, %ch
+	jb readloop
+
+	movb $CYLS, (_CYLS)
+	jmp 0xc200
+
+fin:
+	hlt
+	jmp fin
+
+error:
+	movw $msg, %si
+
+putloop:
+	movb (%si), %al
+	addw $1, %si
+	cmpb $0, %al
+	je fin
+	movb $0x0e, %ah
+	movw $15, %bx
+	int $0x10
+	jmp putloop
+
+msg:
+	.string "\nload error\n\n"
+
+.org 0x01fe
+.byte 0x55, 0xaa
