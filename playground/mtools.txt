@@ -5,3 +5,14 @@ Linuxの普通のコマンド(cp, ls)は、Linuxのファイルシステム(ext4
 
 mcopy、mformatは、mtoolsのコマンドの一つ。
 
+
+mformat
+->
+FAT12形式のフロッピーディスクイメージを作成するためのコマンド
+
+-f 1440 1440KB(3.5インチ 2HDフロッピー)形式
+-B $(IPL) iplをブートセクタ
+
+mcopy
+
+の解説
