@@ -81,4 +81,56 @@ movl $DSKCAC, %edi
 movl $512/4, %ecx
 call memcpy
 
+# 残り全部
+movl $DSKCAC0+512, %esi
+movl $DSKCAC+512, %edi
+movl $0, %ecx
+movb (CYLS), %cl
+imull $512*18*2/4, %ecx
+sub $512/4, %ecx
+call memcpy
+
+# bootpack起動
+movl $BOTPAK, %ebx
+movl 16(%ebx), %ecx
+add $3, %ecx
+SHR $2, %ecx
+jz skip
+movl 20(%ebx)
+add %ebx, %esi
+movl 12(%ebx), %edi
+call memcpy
+
+skip:
+	mov 12(%ebx), %esp
+	ljmll $2*8, $0x0000001b
+
+waitkbdout:
+	inb $0x64, %al
+	andb $0x02, %al
+	jnz waitkbdout
+	ret
+
+memcpy:
+	movl (%esi), %eax
+	add $4, %esi
+	movl %eax, (%edi)
+	add $4, %edi
+	sub $1, %ecx
+ 	jnz memcpy
+	ret
+
+.align 16
+GDT0:
+	.skip 8, 0x00
+	.word 0xffff, 0x0000, 0x9200, 0x00cf
+	.word 0xffff, 0x0000, 0x9a28, 0x0047
+	.word 0x0000
+
+GDTR0:
+	.word 8**3-1
+	.int GDT0
+
+bootpack:
+
 
