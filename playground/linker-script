@@ -1,0 +1,5 @@
+linker-scriptの学習
+
+GASのldのデフォルトリンカスクリプト
+
+ld --verbose
