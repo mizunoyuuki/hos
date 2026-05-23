@@ -26,7 +26,7 @@ jmp entry
 .set _CYLS, 0xff0
 
 entry:
-	# initialize registers
+	# init registers
 	movw $0, %ax
 	movw %ax, %ss
 	movw $0x7c00, %sp
@@ -34,18 +34,18 @@ entry:
 
 	# load disk
 	movw $0x0820, %ax
-	movw %ax, %es # buffer address (ES:BX)
-	movb $0, %ch  # Cylinder 0
-	movb $0, %dh  # head 0
-	movb $2, %cl  # sector 2
+	movw %ax, %es
+	movb $0, %ch
+	movb $0, %dh
+	movb $2, %cl
 
 readloop:
-	movw $0, %si # retry counter
+	movw $0, %si
 
 retry:
 	movb $0x02, %ah
 	movb $1, %al
-	movw $0, %bx
+	movw $0, %bx	
 	movb $0x00, %dl
 	int $0x13
 	jnc next
@@ -54,15 +54,17 @@ retry:
 	cmp $5, %si
 	jae error
 
-	# reset drive
-	movb $0x00, %dh
+	#reset drive
+	movb $0x00, %ah
 	movb $0x00, %dl
 	int $0x13
 
 	jmp retry
+
 next:
 	movw %es, %ax
 	add $0x20, %ax
+	
 	movw %ax, %es
 	add $1, %cl
 	cmp $18, %cl
@@ -79,7 +81,7 @@ next:
 	jb readloop
 
 	movb $CYLS, (_CYLS)
-	jmp 0xc200
+	jmp 0xc200   # jump to os program
 
 fin:
 	hlt
