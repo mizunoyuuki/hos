@@ -1,9 +1,9 @@
 .text
 .code16
 
-.set BOTPAK,  0x00280000  # load destination of bootpack
-.set DSKCAC,  0x00100000  # place of disk cache
-.set DSKCAC0, 0x00008000  # place of disk cache (real mode)
+.set BOTPAK,  0x00280000
+.set DSKCAC,  0x00100000
+.set DSKCAC0, 0x00008000
 
 # BOOT_INFO
 .set CYLS,  0x0ff0
@@ -14,7 +14,7 @@
 .set VRAM,  0x0ff8
 
 # set video mode
-movb $0x13, %al  # vga graphics 320 * 200 32bit color
+movb $0x13, %dl
 movb $0x00, %ah
 int $0x10
 
@@ -29,55 +29,55 @@ movb $0x02, %ah
 int $0x16
 movb %al, (LEDS)
 
-# PICが割り込みを受けないように
-# よくわからないが、AT互換機の仕様では, PICの初期化をする場合CLI前にやる必要があるらしい
+
+# PICが割り込みを受け付けないようにする
+# AT互換機の仕様では,PICの初期化をする場合CLIの前にやる必要があるらしい
 
 movb $0xff, %al
 outb %al, $0x21
 nop
 outb %al, $0xa1
 
-cli  # CPUレベルでの割り込み禁止
+cli # CPUレベルでの割り込み禁止
 
 # A20GATEを設定(メモリを1MBまでアクセスできるようにする)
 call waitkbdout
 movb $0xd1, %al
 outb %al, $0x64
 call waitkbdout
-movb $0xdf, %al # enable A20
+movb $0xdf, %al
 outb %al, $0x60
 call waitkbdout
 
-# protect mode
+# protectmode
 .arch i486
 
-lgdt (GDTR0)
-movl $cr0, %eax
+lgdt (GDTR0)  #暫定GDT
+movl %cr0, %eax
 andl $0x7fffffff, %eax
-orl  $0x00000001, %eax
-movl $eax, %cr0
+orl $0x00000001, %eax
+movl %eax, %cr0
 jmp pipelineflush
 
 pipelineflush:
 	movw $1*8, %ax
 	movw %ax, %ds
-	movw $ax, %es
-	movw $ax, %fs
-	movw $ax, %gs
-	movw $ax, %ss
+	movw %ax, %es
+	movw %ax, %fs
+	movw %ax, %gs
+	movw %ax, %ss
 
 # bootpack転送
-movl $bootpack, %esi
-movl $BOTPAK, %edi
+movl $bootpack, %esi  # 転送元
+movl $BOOTPAK, %edi   # 転送先
 movl $512*1024/4, %ecx
 call memcpy
-
 
 # ディスクデータを本来の位置へ転送
 
 # ブートセクタ
-movl $0x7c00, %esi # 転送元
-movl $DSKCAC, %edi
+movl $0x7c00, %^esi  # 転送元
+movl $DSKCAC, %edi   # 転送先
 movl $512/4, %ecx
 call memcpy
 
@@ -87,7 +87,7 @@ movl $DSKCAC+512, %edi
 movl $0, %ecx
 movb (CYLS), %cl
 imull $512*18*2/4, %ecx
-sub $512/4, %ecx
+sub $512, %ecx
 call memcpy
 
 # bootpack起動
@@ -95,15 +95,15 @@ movl $BOTPAK, %ebx
 movl 16(%ebx), %ecx
 add $3, %ecx
 SHR $2, %ecx
-jz skip
-movl 20(%ebx)
+jz skip # 転送すべきものがない
+movl 20(%ebx), %esi  ## 転送元
 add %ebx, %esi
-movl 12(%ebx), %edi
+movl 12(%ebx), %edi  ## 転送先
 call memcpy
 
 skip:
 	mov 12(%ebx), %esp
-	ljmll $2*8, $0x0000001b
+	ljmpl $2*8, $0x0000001b
 
 waitkbdout:
 	inb $0x64, %al
@@ -115,9 +115,9 @@ memcpy:
 	movl (%esi), %eax
 	add $4, %esi
 	movl %eax, (%edi)
-	add $4, %edi
+	add  $4, %edi
 	sub $1, %ecx
- 	jnz memcpy
+	jnz memcpy
 	ret
 
 .align 16
@@ -128,9 +128,7 @@ GDT0:
 	.word 0x0000
 
 GDTR0:
-	.word 8**3-1
+	.word 8*3-1
 	.int GDT0
 
 bootpack:
-
-
